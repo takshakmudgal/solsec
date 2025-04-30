@@ -3,6 +3,7 @@ import { DuneClient } from "@duneanalytics/client-sdk";
 import dotenv from "dotenv";
 import { logger } from "~/lib/logger";
 import type { db as DbType } from "~/server/db";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -117,7 +118,9 @@ export async function seedDatabase(prisma: typeof DbType): Promise<void> {
   }
 }
 
-if (require.main === module) {
+// ESM check to see if the script is run directly
+const metaUrl = import.meta.url;
+if (metaUrl && fileURLToPath(metaUrl) === process.argv[1]) {
   const prismaStandalone = new PrismaClient();
   seedDatabase(prismaStandalone)
     .catch(async (e) => {
