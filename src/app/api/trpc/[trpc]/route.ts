@@ -4,6 +4,17 @@ import { type NextRequest } from "next/server";
 import { env } from "~/env";
 import { appRouter } from "~/server/api/root";
 import { createTRPCContext } from "~/server/api/trpc";
+import { initializeServices } from "~/server/init";
+import { logger } from "~/lib/logger";
+
+// Initialize services when the module is loaded
+// This ensures it runs once when the server starts
+try {
+  void initializeServices();
+  logger.info("Server services initialization triggered");
+} catch (error) {
+  logger.error("Failed to initialize server services", { error });
+}
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
@@ -24,9 +35,9 @@ const handler = (req: NextRequest) =>
     onError:
       env.NODE_ENV === "development"
         ? ({ path, error }) => {
-            console.error(
-              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
-            );
+            logger.error(`tRPC failed on ${path ?? "<no-path>"}`, {
+              error: error.message,
+            });
           }
         : undefined,
   });

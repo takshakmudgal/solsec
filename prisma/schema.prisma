@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Exploit {
+  id              String    @id @default(cuid())
+  protocol        String
+  hackDate        DateTime  @db.Date
+  amountStolen    Float     @map("amount_stolen_usd")
+  exploitType     String    @map("exploit_type")
+  technique       String
+  relatedEntity   String?   @map("related_entity")
+  recovered       Boolean   @default(false)
+  resolution      String?
+  auditedBy       String?   @map("audited_by")
+  notes           String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([protocol, hackDate])
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model SubmittedExploit {
+  id            String            @id @default(cuid())
+  protocol      String
+  hackDate      DateTime
+  amountStolen  Float
+  exploitType   String
+  technique     String
+  relatedEntity String?
+  notes         String?
+  submitterInfo String?
+  status        SubmissionStatus  @default(PENDING)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
